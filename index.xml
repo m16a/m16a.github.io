@@ -6,14 +6,16 @@
     <description>Recent content on Misha Shvorak</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 04 Jun 2018 00:00:00 +0000</lastBuildDate><atom:link href="https://m16a.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 02 Jul 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://m16a.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>An Example Post</title>
-      <link>https://m16a.github.io/post/testpage/</link>
-      <pubDate>Mon, 04 Jun 2018 00:00:00 +0000</pubDate>
+      <title>Using motor driver DRV8833</title>
+      <link>https://m16a.github.io/post/drv8833_setup/</link>
+      <pubDate>Fri, 02 Jul 2021 00:00:00 +0000</pubDate>
       
-      <guid>https://m16a.github.io/post/testpage/</guid>
-      <description></description>
+      <guid>https://m16a.github.io/post/drv8833_setup/</guid>
+      <description>Here you can find how to use motor driver based on DRV8833 (datasheet). I have chip with some NC (not connected) pins, like on picture below:
+Connection scheme Scheme below shows how to control two motors simultaneously using single potentiometer. I tried with joystick, but default one has too low working angles and huge blind zones where resistance doesn&amp;rsquo;t change.
+   PINS, elements Description     AIN1, AIN2 2V, 50kHz pwm to control motor 1   BIN1, BIN2 2V, 50KHz pwm to control motor 2   STBY pass high signal (2V) to enable controller, or low (0V) to enter low-power sleep mode and reset all internal logic   VM 11V max, external DC source.</description>
     </item>
     
   </channel>

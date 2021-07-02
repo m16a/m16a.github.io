@@ -28,15 +28,15 @@
     
 
     
-    <meta name="title" content="Blog" />
-    <meta property="og:title" content="Blog" />
-    <meta property="twitter:title" content="Blog" />
+    <meta name="title" content="Using motor driver DRV8833" />
+    <meta property="og:title" content="Using motor driver DRV8833" />
+    <meta property="twitter:title" content="Using motor driver DRV8833" />
     
 
     
-    <meta name="description" content="">
-    <meta property="og:description" content="" />
-    <meta property="twitter:description" content="" />
+    <meta name="description" content="Scheme with code snippet">
+    <meta property="og:description" content="Scheme with code snippet" />
+    <meta property="twitter:description" content="Scheme with code snippet" />
     
 
     
@@ -47,9 +47,9 @@
     <meta name="keyword"  content="c&#43;&#43;, robotics">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>Posts-</title>
+    <title>Using motor driver DRV8833-</title>
 
-    <link rel="canonical" href="/post/">
+    <link rel="canonical" href="/post/drv8833_setup/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -155,14 +155,41 @@
 
 
 
-<header class="intro-header" style="background-image: url('/')">
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/')
+    }
+</style>
+<header class="intro-header">
     <div class="container">
         <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
-                <div class="site-heading">
-                    <h1>Blog </h1>
-                    
-		    <span class="subheading">Seek and you shall find</span>
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/robotics" title="robotics">
+                            robotics
+                        </a>
+                        
+                        <a class="tag" href="/tags/electronics" title="electronics">
+                            electronics
+                        </a>
+                        
+                    </div>
+                    <h1>Using motor driver DRV8833</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by 
+                        
+                                 &#34;Misha Shvorak&#34;
+                         
+                        on 
+                        Friday, July 2, 2021
+                        
+                        
+                        
+                    </span>
                 </div>
             </div>
         </div>
@@ -175,13 +202,125 @@
 <article>
     <div class="container">
         <div class="row">
+
             
             <div class="
-                col-lg-8 col-lg-offset-2
+                col-lg-11 col-lg-offset-1
                 col-md-10 col-md-offset-1
                 post-container">
 
-         	
+                
+                <p>Here you can find how to use motor driver based on DRV8833 (<a href="https://www.ti.com/lit/ds/symlink/drv8833.pdf?ts=1624784448800">datasheet</a>). I have chip with some NC (not connected) pins, like on picture below:</p>
+<p>
+  <img src="/drv8833/driver.jpg" alt="driver_image">
+
+</p>
+<h4 id="connection-scheme">Connection scheme</h4>
+<p>Scheme below shows how to control two motors simultaneously using single potentiometer. I tried with joystick, but default one has too low working angles and huge blind zones where resistance doesn&rsquo;t change.</p>
+<p>
+  <img src="/drv8833/schem.png" alt="scheme_image">
+
+</p>
+<table>
+<thead>
+<tr>
+<th>PINS, elements</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AIN1, AIN2</td>
+<td>2V, 50kHz pwm to control motor 1</td>
+</tr>
+<tr>
+<td>BIN1, BIN2</td>
+<td>2V, 50KHz pwm to control motor 2</td>
+</tr>
+<tr>
+<td>STBY</td>
+<td><strong>pass high signal (2V) to enable controller, or low (0V) to enter low-power sleep mode and reset all internal logic</strong></td>
+</tr>
+<tr>
+<td>VM</td>
+<td>11V max, external DC source. bypass capasitor to GRND is recomended (look datasheet for more info)</td>
+</tr>
+<tr>
+<td>AO1, AO2</td>
+<td>output source for motor 1</td>
+</tr>
+<tr>
+<td>BO1, BO2</td>
+<td>output source for motor 2</td>
+</tr>
+<tr>
+<td>R16, R17, R18</td>
+<td>resistors to restrict input logic signal to 2V</td>
+</tr>
+<tr>
+<td>RP1</td>
+<td>potentiometer to control motors direction and thrust. Midle point - resting, counter clockwise - backward, clockwise - forward</td>
+</tr>
+</tbody>
+</table>
+<h4 id="code-snippet-for-arduino">Code snippet for arduino</h4>
+<p>Not sure about control frequncy pwm, is 50kHz maximum or optimal frequency? But with default arduino pins D3 and D11 frequncy (488Hz) my motors produce scary screaming sound. So I use GyverPWM library to override default pin frequency, note that this tweak changes timer setup and disables some pins, more info you can find here <a href="https://github.com/GyverLibs/GyverPWM">https://github.com/GyverLibs/GyverPWM</a> (in russian). I found this library is easiest and fastest way to override pin pwm.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-arduino" data-lang="arduino"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;GyverPWM.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">// use only this pins, because lib above works only with specified pins. look docs for more info
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> motor_forward_pin <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>;
+<span style="color:#66d9ef">int</span> motor_backward_pin <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+
+<span style="color:#66d9ef">int</span> potentiometer_pin <span style="color:#f92672">=</span> A0;
+<span style="color:#66d9ef">int</span> potentiometer_value;
+<span style="color:#66d9ef">int</span> motor_value;
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setup</span>() {
+  <span style="color:#a6e22e">pinMode</span>(motor_forward_pin, <span style="color:#66d9ef">OUTPUT</span>);
+  <span style="color:#a6e22e">pinMode</span>(motor_backward_pin, <span style="color:#66d9ef">OUTPUT</span>);
+
+  PWM_frequency(motor_forward_pin, <span style="color:#ae81ff">50000</span><span style="color:#75715e">/*Hz*/</span>, FAST_PWM);
+  PWM_frequency(motor_backward_pin, <span style="color:#ae81ff">50000</span><span style="color:#75715e">/*Hz*/</span>, FAST_PWM);
+}
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">loop</span>() {
+  <span style="color:#75715e">//Reading from potentiometer
+</span><span style="color:#75715e"></span>  potentiometer_value <span style="color:#f92672">=</span> <span style="color:#a6e22e">analogRead</span>(potentiometer_pin);
+
+  <span style="color:#66d9ef">if</span> (potentiometer_value <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">500</span>) {
+    <span style="color:#75715e">// moving backward
+</span><span style="color:#75715e"></span>    PWM_set(motor_forward_pin, <span style="color:#ae81ff">0</span>);
+    motor_value <span style="color:#f92672">=</span> <span style="color:#a6e22e">map</span>(potentiometer_value, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">500</span>, <span style="color:#ae81ff">255</span>, <span style="color:#ae81ff">170</span>);
+    PWM_set(motor_backward_pin, motor_value);
+  } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (potentiometer_value <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">524</span>) {
+    <span style="color:#75715e">// moving forward
+</span><span style="color:#75715e"></span>    motor_value <span style="color:#f92672">=</span> <span style="color:#a6e22e">map</span>(potentiometer_value, <span style="color:#ae81ff">524</span>, <span style="color:#ae81ff">1023</span>, <span style="color:#ae81ff">170</span>, <span style="color:#ae81ff">255</span>);
+    PWM_set(motor_forward_pin, motor_value);
+    PWM_set(motor_backward_pin, <span style="color:#ae81ff">0</span>);
+  } <span style="color:#66d9ef">else</span> {
+    <span style="color:#75715e">// resting
+</span><span style="color:#75715e"></span>    PWM_set(motor_forward_pin, <span style="color:#ae81ff">0</span>);
+    PWM_set(motor_backward_pin, <span style="color:#ae81ff">0</span>);
+  }
+
+  <span style="color:#a6e22e">delay</span>(<span style="color:#ae81ff">1</span>);
+}</code></pre></div>
+<h4 id="video-with-working-controller">Video with working controller</h4>
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+  <iframe src="https://www.youtube.com/embed/hF2UcO4d6zQ" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video"></iframe>
+</div>
+
+
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    
+                </ul>
+
                 
 <div id="disqus-comment"></div>
 
@@ -190,7 +329,7 @@
             </div>
             
             <div class="
-                col-lg-8 col-lg-offset-2
+                col-lg-11 col-lg-offset-1
                 col-md-10 col-md-offset-1
                 sidebar-container">
 
@@ -204,13 +343,13 @@
                         
                         
                         <a href="/tags/electronics" title="electronics">
-                        electronics
+                            electronics
                         </a>
                         
                         
                         
                         <a href="/tags/robotics" title="robotics">
-                        robotics
+                            robotics
                         </a>
                         
                         
